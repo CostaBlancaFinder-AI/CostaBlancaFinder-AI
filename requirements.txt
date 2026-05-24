@@ -1,0 +1,17 @@
+pandas
+numpy
+requests
+beautifulsoup4
+selenium
+streamlit
+fastapi
+uvicorn
+scikit-learn
+openai
+python-dotenv
+jupyter
+matplotlib
+plotly
+sqlalchemy
+folium
+streamlit-folium
