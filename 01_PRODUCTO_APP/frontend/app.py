@@ -59,6 +59,7 @@ from search_service import filter_properties
 # ============================================================
 
 from database.property_repository import load_properties
+from database.location_repository import load_locations
 
 # ============================================================
 # UTILS IMPORTS
@@ -301,7 +302,7 @@ st.divider()
 
 st.subheader("Mapa Inteligente Costa Blanca")
 
-locations = load_csv(OSM_LOCATIONS_DATASET)
+locations = load_locations()
 
 m = create_base_map()
 m = add_location_markers(m, locations)
