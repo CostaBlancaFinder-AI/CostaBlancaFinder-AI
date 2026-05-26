@@ -19,3 +19,4 @@ def load_locations():
     """
 
     return load_csv(OSM_LOCATIONS_DATASET)
+

@@ -101,3 +101,17 @@ def get_average_price(df: pd.DataFrame) -> float:
         return 0
 
     return round(df["price_eur"].mean(), 2)
+
+# ============================================================
+# AVERAGE PRICE
+# ============================================================
+
+def get_average_price_from_df(df: pd.DataFrame) -> float:
+    """
+    Calcula el precio medio a partir de un DataFrame filtrado.
+    """
+
+    if df.empty:
+        return 0
+
+    return round(df["price_eur"].mean(), 2)

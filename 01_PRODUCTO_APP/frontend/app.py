@@ -53,6 +53,7 @@ from scoring_service import (
     get_top_opportunities,
     get_average_opportunity_score,
     get_average_price_m2,
+    get_average_price_from_df,
 )
 
 # ============================================================
@@ -147,7 +148,7 @@ if not df_filtered.empty:
 
     col2.metric(
         "Precio medio (€)",
-        round(df_filtered["price_eur"].mean(), 2)
+        get_average_price_from_df(df_filtered)
     )
 
     col3.metric(
