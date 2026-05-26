@@ -5,6 +5,17 @@
 
 import streamlit as st
 import pandas as pd
+import sys
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+sys.path.append(str(ROOT_DIR / "01_PRODUCTO_APP" / "config"))
+
+from settings import (
+    ENRICHED_DATASET,
+    RECOMMENDATIONS_DATASET,
+    APP_NAME,
+)
 import folium
 from streamlit_folium import st_folium
 
@@ -22,9 +33,7 @@ st.set_page_config(
 # CARGA DE DATOS
 # ------------------------------------------------------------
 
-DATA_PATH = "02_DATA_IA/processed_data/rentals_enriched.csv"
-
-df = pd.read_csv(DATA_PATH)
+df = pd.read_csv(ENRICHED_DATASET)
 
 # ------------------------------------------------------------
 # SIDEBAR

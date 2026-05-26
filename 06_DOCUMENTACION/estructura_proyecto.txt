@@ -1,0 +1,177 @@
+.
+├── 00_ADMIN_EMPRESA
+│   ├── dominios_correos
+│   ├── estrategia
+│   ├── legal
+│   └── marca
+├── 01_PRODUCTO_APP
+│   ├── api
+│   ├── backend
+│   ├── config
+│   │   └── settings.py
+│   ├── database
+│   ├── docker
+│   ├── frontend
+│   │   └── app.py
+│   ├── infrastructure
+│   ├── landing_page
+│   ├── mobile_app
+│   └── tests
+├── 02_DATA_IA
+│   ├── datasets
+│   │   ├── osm_locations.csv
+│   │   └── rentals_raw.csv
+│   ├── embeddings
+│   ├── experiments
+│   ├── feature_engineering
+│   │   ├── FEATURE_ENGINEERING_ROADMAP.md
+│   │   └── location_enrichment.py
+│   ├── modelos
+│   ├── models
+│   ├── notebooks
+│   │   └── market_dashboard.ipynb
+│   ├── processed_data
+│   │   ├── rentals_enriched.csv
+│   │   ├── rentals_scored.csv
+│   │   └── rentals_scored_v2.csv
+│   ├── raw_data
+│   ├── recommendation_system
+│   │   └── recommendation_engine.py
+│   ├── recommendations
+│   │   └── recommended_properties.csv
+│   ├── scoring_algorithms
+│   ├── scoring_engine
+│   │   ├── idealista_scraper.ipynb
+│   │   ├── opportunity_score.ipynb
+│   │   ├── opportunity_score.py
+│   │   └── opportunity_score_v2.py
+│   ├── scrapers
+│   │   ├── idealista_scraper.py
+│   │   └── real_sources
+│   └── vector_db
+├── 03_AUTOMATIZACIONES
+│   ├── PIPELINE_DOCUMENTATION.md
+│   ├── email_alerts
+│   ├── logs
+│   │   ├── README.md
+│   │   └── pipeline.log
+│   ├── telegram_bot
+│   ├── update_pipeline.py
+│   ├── whatsapp_bot
+│   └── workflows
+├── 04_REDES_SOCIALES
+│   ├── branding
+│   │   ├── BRAND_GUIDE.md
+│   │   ├── colores
+│   │   ├── logo
+│   │   ├── mockups
+│   │   ├── plantillas
+│   │   └── tipografias
+│   ├── calendario_contenido
+│   ├── facebook
+│   ├── instagram
+│   ├── tiktok
+│   └── youtube
+├── 05_MARKETING_VENTAS
+│   ├── clientes
+│   ├── inmobiliarias
+│   ├── propietarios
+│   ├── propuestas_comerciales
+│   └── turistas
+├── 06_DOCUMENTACION
+│   ├── ROADMAP_COSTABLANCAFINDER.md
+│   ├── arquitectura_tecnica
+│   │   ├── AI_AGENTS_ARCHITECTURE.md
+│   │   ├── DATABASE_ARCHITECTURE.md
+│   │   └── SYSTEM_ARCHITECTURE.md
+│   ├── decisiones_importantes
+│   ├── modelo_negocio
+│   │   └── PRODUCT_VISION.md
+│   ├── roadmap
+│   └── vision_startup
+│       └── VISION_COSTABLANCAFINDER.md
+├── 07_FINANZAS
+│   ├── costes
+│   ├── ingresos
+│   ├── inversores
+│   └── precios_servicios
+├── 08_OPERACIONES
+│   ├── atencion_cliente
+│   ├── calidad_servicio
+│   ├── procesos
+│   └── proveedores
+├── 09_LEGAL_COMPLIANCE
+│   ├── contratos
+│   ├── privacidad
+│   ├── proteccion_datos_RGPD
+│   └── terminos_condiciones
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+├── estructura.txt
+├── requirements.txt
+└── venv
+    ├── bin
+    │   ├── Activate.ps1
+    │   ├── activate
+    │   ├── activate.csh
+    │   ├── activate.fish
+    │   ├── debugpy
+    │   ├── debugpy-adapter
+    │   ├── f2py
+    │   ├── fonttools
+    │   ├── httpx
+    │   ├── ipython
+    │   ├── ipython3
+    │   ├── jlpm
+    │   ├── jsonpointer
+    │   ├── jsonschema
+    │   ├── jupyter
+    │   ├── jupyter-console
+    │   ├── jupyter-dejavu
+    │   ├── jupyter-events
+    │   ├── jupyter-execute
+    │   ├── jupyter-kernel
+    │   ├── jupyter-kernelspec
+    │   ├── jupyter-lab
+    │   ├── jupyter-labextension
+    │   ├── jupyter-labhub
+    │   ├── jupyter-migrate
+    │   ├── jupyter-nbconvert
+    │   ├── jupyter-notebook
+    │   ├── jupyter-run
+    │   ├── jupyter-server
+    │   ├── jupyter-troubleshoot
+    │   ├── jupyter-trust
+    │   ├── normalizer
+    │   ├── numpy-config
+    │   ├── pip
+    │   ├── pip3
+    │   ├── pip3.9
+    │   ├── pybabel
+    │   ├── pyftmerge
+    │   ├── pyftsubset
+    │   ├── pygmentize
+    │   ├── pyjson5
+    │   ├── python -> python3
+    │   ├── python3 -> /Library/Developer/CommandLineTools/usr/bin/python3
+    │   ├── python3.9 -> python3
+    │   ├── send2trash
+    │   ├── streamlit
+    │   ├── streamlit.cmd
+    │   ├── ttx
+    │   └── wsdump
+    ├── etc
+    │   └── jupyter
+    ├── include
+    ├── lib
+    │   └── python3.9
+    ├── pyvenv.cfg
+    └── share
+        ├── applications
+        ├── icons
+        ├── jupyter
+        ├── man
+        └── xyzservices
+
+92 directories, 83 files
