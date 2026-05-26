@@ -43,6 +43,21 @@ def filter_properties(
     Filtra propiedades por ciudad, precio máximo y habitaciones mínimas.
     """
 
+    if df is None or df.empty:
+        return pd.DataFrame()
+
+    required_columns = [
+        "city",
+        "price_eur",
+        "rooms"
+    ]
+
+    for column in required_columns:
+        if column not in df.columns:
+            raise ValueError(
+                f"Falta la columna obligatoria en el dataset: {column}"
+            )
+
     filtered = df.copy()
 
     if city_filter != "Todas":
