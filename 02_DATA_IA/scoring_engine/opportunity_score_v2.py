@@ -5,6 +5,15 @@
 
 import pandas as pd
 
+from ml.scoring.opportunity_model import (
+    calculate_price_score,
+    calculate_location_score,
+    calculate_room_score,
+    calculate_tourism_score,
+    classify_opportunity_level,
+    calculate_opportunity_score,
+)
+
 # ------------------------------------------------------------
 # CONFIGURACIÓN
 # ------------------------------------------------------------
@@ -14,7 +23,7 @@ OUTPUT_FILE = "02_DATA_IA/processed_data/rentals_scored_v2.csv"
 
 
 # ------------------------------------------------------------
-# FUNCIONES DE SCORING
+# FEATURE ENGINEERING
 # ------------------------------------------------------------
 
 def calculate_price_m2(df: pd.DataFrame) -> pd.DataFrame:
@@ -27,90 +36,9 @@ def calculate_price_m2(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def calculate_price_score(price_m2: float) -> int:
-    """
-    Puntúa la oportunidad según precio por m².
-    """
-
-    if price_m2 < 10:
-        return 40
-    elif price_m2 < 13:
-        return 25
-    elif price_m2 < 16:
-        return 15
-    else:
-        return 5
-
-
-def calculate_location_score(city: str) -> int:
-    """
-    Puntúa la ubicación según ciudades premium.
-    """
-
-    premium_locations = [
-        "Villajoyosa",
-        "Benidorm",
-        "Finestrat",
-        "Altea"
-    ]
-
-    if city in premium_locations:
-        return 20
-
-    return 10
-
-
-def calculate_room_score(rooms: int) -> int:
-    """
-    Puntúa según número de habitaciones.
-    """
-
-    if rooms >= 3:
-        return 20
-    elif rooms == 2:
-        return 15
-    else:
-        return 8
-
-
-def calculate_tourism_score(title: str) -> int:
-    """
-    Puntúa atractivo turístico según palabras clave.
-    """
-
-    title = str(title).lower()
-
-    keywords = [
-        "playa",
-        "vistas mar",
-        "mar",
-        "turístico",
-        "cala",
-        "centro"
-    ]
-
-    score = 0
-
-    for keyword in keywords:
-        if keyword in title:
-            score += 5
-
-    return min(score, 20)
-
-
-def classify_opportunity_level(score: int) -> str:
-    """
-    Clasifica el nivel de oportunidad.
-    """
-
-    if score >= 85:
-        return "High Opportunity"
-
-    if score >= 65:
-        return "Medium Opportunity"
-
-    return "Low Opportunity"
-
+# ------------------------------------------------------------
+# SCORING PIPELINE
+# ------------------------------------------------------------
 
 def apply_scoring(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -124,11 +52,14 @@ def apply_scoring(df: pd.DataFrame) -> pd.DataFrame:
     df["room_score"] = df["rooms"].apply(calculate_room_score)
     df["tourism_score"] = df["title"].apply(calculate_tourism_score)
 
-    df["opportunity_score"] = (
-        df["price_score"]
-        + df["location_score"]
-        + df["room_score"]
-        + df["tourism_score"]
+    df["opportunity_score"] = df.apply(
+        lambda row: calculate_opportunity_score(
+            price_score=row["price_score"],
+            location_score=row["location_score"],
+            room_score=row["room_score"],
+            tourism_score=row["tourism_score"]
+        ),
+        axis=1
     )
 
     df["opportunity_level"] = df["opportunity_score"].apply(
@@ -142,6 +73,10 @@ def apply_scoring(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+
+# ------------------------------------------------------------
+# MAIN EXECUTION
+# ------------------------------------------------------------
 
 def main():
     """
