@@ -48,6 +48,13 @@ from map_service import (
 
 from search_service import filter_properties
 
+from scoring_service import (
+    get_best_opportunity_from_df,
+    get_top_opportunities,
+    get_average_opportunity_score,
+    get_average_price_m2,
+)
+
 # ============================================================
 # DATABASE IMPORTS
 # ============================================================
@@ -144,13 +151,13 @@ if not df_filtered.empty:
     )
 
     col3.metric(
-        "€/m² medio",
-        round(df_filtered["price_m2"].mean(), 2)
+    "€/m² medio",
+    get_average_price_m2(df_filtered)
     )
 
     col4.metric(
-        "Score medio",
-        round(df_filtered["opportunity_score"].mean(), 2)
+    "Score medio",
+    get_average_opportunity_score(df_filtered)
     )
 
 else:
@@ -169,10 +176,7 @@ st.subheader("🔥 Mejor oportunidad actual")
 
 if not df_filtered.empty:
 
-    best = df_filtered.sort_values(
-        by="opportunity_score",
-        ascending=False
-    ).iloc[0]
+    best = get_best_opportunity_from_df(df_filtered)
 
     st.success(
         f"{best['city']} - {best['zone']} | "
@@ -218,10 +222,7 @@ st.subheader("Top 3 oportunidades")
 
 if not df_filtered.empty:
 
-    top3 = df_filtered.sort_values(
-        "opportunity_score",
-        ascending=False
-    ).head(3)
+    top3 = get_top_opportunities(df_filtered)
 
     st.dataframe(
         top3[[
