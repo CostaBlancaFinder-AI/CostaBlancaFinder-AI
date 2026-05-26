@@ -14,7 +14,19 @@ sys.path.append(str(ROOT_DIR / "01_PRODUCTO_APP" / "config"))
 from settings import (
     ENRICHED_DATASET,
     RECOMMENDATIONS_DATASET,
+    OSM_LOCATIONS_DATASET,
     APP_NAME,
+)
+sys.path.append(str(ROOT_DIR / "01_PRODUCTO_APP" / "services"))
+
+from analytics_service import (
+    get_total_properties,
+    get_average_price,
+    get_best_opportunity,
+)
+from recommendation_service import (
+    load_recommendations,
+    has_recommendations,
 )
 import folium
 from streamlit_folium import st_folium
@@ -96,10 +108,17 @@ st.divider()
 
 col1, col2, col3, col4 = st.columns(4)
 
-col1.metric("Propiedades filtradas", len(df_filtered))
+col1.metric(
+    "Propiedades filtradas",
+    get_total_properties(df_filtered)
+)
+
 
 if not df_filtered.empty:
-    col2.metric("Precio medio (€)", round(df_filtered["price_eur"].mean(), 2))
+    col2.metric(
+    "Precio medio (€)",
+    get_average_price(df_filtered)
+)
     col3.metric("€/m² medio", round(df_filtered["price_m2"].mean(), 2))
     col4.metric("Score medio", round(df_filtered["opportunity_score"].mean(), 2))
 else:
@@ -116,10 +135,7 @@ st.divider()
 st.subheader("🔥 Mejor oportunidad actual")
 
 if not df_filtered.empty:
-    best = df_filtered.sort_values(
-        "opportunity_score",
-        ascending=False
-    ).iloc[0]
+    best = get_best_opportunity(df_filtered)
 
     st.success(
         f"{best['city']} - {best['zone']} | "
@@ -226,9 +242,7 @@ m = folium.Map(
     zoom_start=10
 )
 
-locations = pd.read_csv(
-    "02_DATA_IA/datasets/osm_locations.csv"
-)
+locations = pd.read_csv(OSM_LOCATIONS_DATASET)
 
 for _, row in locations.iterrows():
 
@@ -251,11 +265,10 @@ st.divider()
 
 st.subheader("Recomendaciones IA")
 
-recommendations = pd.read_csv(
-    "02_DATA_IA/recommendations/recommended_properties.csv"
-)
+recommendations = load_recommendations(RECOMMENDATIONS_DATASET)
 
-if not recommendations.empty:
+if has_recommendations(recommendations):
+
     st.dataframe(
         recommendations[[
             "city",

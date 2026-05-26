@@ -30,7 +30,9 @@ ENRICHED_DATASET = (
 RECOMMENDATIONS_DATASET = (
     BASE_DIR / "02_DATA_IA/recommendations/recommended_properties.csv"
 )
-
+OSM_LOCATIONS_DATASET = (
+    BASE_DIR / "02_DATA_IA/datasets/osm_locations.csv"
+)
 
 # =========================================================
 # LOGS
