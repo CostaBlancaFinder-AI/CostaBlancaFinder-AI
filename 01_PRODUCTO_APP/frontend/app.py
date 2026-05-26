@@ -32,6 +32,7 @@ from map_service import (
     create_base_map,
     add_location_markers,
 )
+from search_service import filter_properties
 import folium
 from streamlit_folium import st_folium
 
@@ -84,13 +85,12 @@ rooms_filter = st.sidebar.selectbox(
 # FILTRADO DE DATOS
 # ------------------------------------------------------------
 
-df_filtered = df.copy()
-
-if city_filter != "Todas":
-    df_filtered = df_filtered[df_filtered["city"] == city_filter]
-
-df_filtered = df_filtered[df_filtered["price_eur"] <= max_price]
-df_filtered = df_filtered[df_filtered["rooms"] >= rooms_filter]
+df_filtered = filter_properties(
+    df=df,
+    city_filter=city_filter,
+    max_price=max_price,
+    min_rooms=rooms_filter
+)
 
 # ------------------------------------------------------------
 # CABECERA PRINCIPAL
