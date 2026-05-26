@@ -28,6 +28,10 @@ from recommendation_service import (
     load_recommendations,
     has_recommendations,
 )
+from map_service import (
+    create_base_map,
+    add_location_markers,
+)
 import folium
 from streamlit_folium import st_folium
 
@@ -235,23 +239,10 @@ st.divider()
 
 st.subheader("Mapa Inteligente Costa Blanca")
 
-map_center = [38.5400, -0.1300]
-
-m = folium.Map(
-    location=map_center,
-    zoom_start=10
-)
-
 locations = pd.read_csv(OSM_LOCATIONS_DATASET)
 
-for _, row in locations.iterrows():
-
-    folium.Marker(
-        location=[row["latitude"], row["longitude"]],
-        popup=f"{row['name']} ({row['city']})",
-        tooltip=row["type"]
-    ).add_to(m)
-
+m = create_base_map()
+m = add_location_markers(m, locations)
 st_folium(
     m,
     width=1200,
