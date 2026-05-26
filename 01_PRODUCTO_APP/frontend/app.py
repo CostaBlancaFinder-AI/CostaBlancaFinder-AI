@@ -4,10 +4,8 @@
 # ============================================================
 
 import streamlit as st
-import pandas as pd
 import sys
 from pathlib import Path
-import folium
 from streamlit_folium import st_folium
 
 # ============================================================
@@ -26,11 +24,7 @@ sys.path.append(str(APP_DIR / "utils"))
 # CONFIG IMPORTS
 # ============================================================
 
-from settings import (
-    RECOMMENDATIONS_DATASET,
-    OSM_LOCATIONS_DATASET,
-    APP_NAME,
-)
+from settings import APP_NAME
 
 # ============================================================
 # SERVICES IMPORTS
@@ -60,12 +54,6 @@ from search_service import filter_properties
 
 from database.property_repository import load_properties
 from database.location_repository import load_locations
-
-# ============================================================
-# UTILS IMPORTS
-# ============================================================
-
-from data_loader import load_csv
 
 # ------------------------------------------------------------
 # CONFIGURACIÓN GENERAL
