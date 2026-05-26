@@ -203,10 +203,7 @@ st.subheader("Clasificación de oportunidades")
 if not df_filtered.empty:
 
     st.dataframe(
-        df_filtered.sort_values(
-            "opportunity_score",
-            ascending=False
-        ),
+        get_top_opportunities(df_filtered, top_n=len(df_filtered)),
         use_container_width=True
     )
 
