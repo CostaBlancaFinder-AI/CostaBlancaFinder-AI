@@ -56,6 +56,20 @@ write_log("===================================")
 
 try:
     run_step(
+        "[0.1/5] Validate Real Properties",
+        "python3 02_DATA_IA/validation/validate_real_properties.py"
+    )
+
+    time.sleep(1)
+
+    run_step(
+        "[0.2/5] Promote Validated Properties",
+        "python3 02_DATA_IA/validation/promote_validated_properties.py"
+    )
+
+    time.sleep(1)
+
+    run_step(
         "[1/5] Scraper",
         "python3 02_DATA_IA/scrapers/idealista_scraper.py"
     )
@@ -78,7 +92,7 @@ try:
 
     run_step(
         "[4/5] Recommendation Engine",
-        "python3 02_DATA_IA/recommendation_system/recommendation_engine.py"
+        "PYTHONPATH=01_PRODUCTO_APP python3 02_DATA_IA/recommendation_system/recommendation_engine.py"
     )
 
     time.sleep(1)
