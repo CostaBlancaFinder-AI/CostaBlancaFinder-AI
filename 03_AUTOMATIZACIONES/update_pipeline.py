@@ -3,12 +3,26 @@
 # Automated Data Pipeline with Error Control
 # ============================================================
 
-import os
+import sys
 import time
 import subprocess
+from pathlib import Path
 from datetime import datetime
 
-log_path = "03_AUTOMATIZACIONES/logs/pipeline.log"
+# ============================================================
+# ROOT CONFIGURATION
+# ============================================================
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+APP_DIR = ROOT_DIR / "01_PRODUCTO_APP"
+
+sys.path.append(str(APP_DIR))
+
+# ============================================================
+# LOG CONFIGURATION
+# ============================================================
+
+log_path = ROOT_DIR / "03_AUTOMATIZACIONES" / "logs" / "pipeline.log"
 
 
 def write_log(message):
@@ -50,7 +64,7 @@ try:
 
     run_step(
         "[2/5] AI Scoring Agent",
-        "python3 02_DATA_IA/scoring_engine/opportunity_score_v2.py"
+        "PYTHONPATH=01_PRODUCTO_APP python3 02_DATA_IA/scoring_engine/opportunity_score_v2.py"
     )
 
     time.sleep(1)
