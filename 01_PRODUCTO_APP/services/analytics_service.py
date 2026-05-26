@@ -16,6 +16,8 @@ Frontend (Streamlit)
     ↓
 Analytics Service
     ↓
+Property Repository
+    ↓
 Datasets procesados
 
 Futuro:
@@ -29,15 +31,19 @@ Futuro:
 
 import pandas as pd
 
+from database.property_repository import load_properties
+
 
 # ============================================================
 # KPI: TOTAL PROPERTIES
 # ============================================================
 
-def get_total_properties(df: pd.DataFrame) -> int:
+def get_total_properties() -> int:
     """
     Devuelve número total de propiedades.
     """
+
+    df = load_properties()
 
     return len(df)
 
@@ -46,10 +52,12 @@ def get_total_properties(df: pd.DataFrame) -> int:
 # KPI: AVERAGE PRICE
 # ============================================================
 
-def get_average_price(df: pd.DataFrame) -> float:
+def get_average_price() -> float:
     """
     Devuelve precio promedio.
     """
+
+    df = load_properties()
 
     return round(df["price_eur"].mean(), 2)
 
@@ -58,10 +66,12 @@ def get_average_price(df: pd.DataFrame) -> float:
 # KPI: BEST OPPORTUNITY
 # ============================================================
 
-def get_best_opportunity(df: pd.DataFrame):
+def get_best_opportunity():
     """
     Devuelve propiedad con mayor opportunity score.
     """
+
+    df = load_properties()
 
     return df.sort_values(
         by="opportunity_score",
@@ -73,9 +83,11 @@ def get_best_opportunity(df: pd.DataFrame):
 # KPI: CITY DISTRIBUTION
 # ============================================================
 
-def get_city_distribution(df: pd.DataFrame):
+def get_city_distribution():
     """
     Distribución de propiedades por ciudad.
     """
+
+    df = load_properties()
 
     return df["city"].value_counts()

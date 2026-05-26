@@ -7,34 +7,64 @@ import streamlit as st
 import pandas as pd
 import sys
 from pathlib import Path
+import folium
+from streamlit_folium import st_folium
+
+# ============================================================
+# ROOT CONFIGURATION
+# ============================================================
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
-sys.path.append(str(ROOT_DIR / "01_PRODUCTO_APP" / "config"))
+APP_DIR = ROOT_DIR / "01_PRODUCTO_APP"
+
+sys.path.append(str(APP_DIR))
+sys.path.append(str(APP_DIR / "config"))
+sys.path.append(str(APP_DIR / "services"))
+sys.path.append(str(APP_DIR / "utils"))
+
+# ============================================================
+# CONFIG IMPORTS
+# ============================================================
 
 from settings import (
-    ENRICHED_DATASET,
     RECOMMENDATIONS_DATASET,
     OSM_LOCATIONS_DATASET,
     APP_NAME,
 )
-sys.path.append(str(ROOT_DIR / "01_PRODUCTO_APP" / "services"))
+
+# ============================================================
+# SERVICES IMPORTS
+# ============================================================
 
 from analytics_service import (
     get_total_properties,
     get_average_price,
     get_best_opportunity,
 )
+
 from recommendation_service import (
     load_recommendations,
     has_recommendations,
 )
+
 from map_service import (
     create_base_map,
     add_location_markers,
 )
+
 from search_service import filter_properties
-import folium
-from streamlit_folium import st_folium
+
+# ============================================================
+# DATABASE IMPORTS
+# ============================================================
+
+from database.property_repository import load_properties
+
+# ============================================================
+# UTILS IMPORTS
+# ============================================================
+
+from data_loader import load_csv
 
 # ------------------------------------------------------------
 # CONFIGURACIÓN GENERAL
@@ -50,7 +80,7 @@ st.set_page_config(
 # CARGA DE DATOS
 # ------------------------------------------------------------
 
-df = pd.read_csv(ENRICHED_DATASET)
+df = load_properties()
 
 # ------------------------------------------------------------
 # SIDEBAR
@@ -114,18 +144,28 @@ col1, col2, col3, col4 = st.columns(4)
 
 col1.metric(
     "Propiedades filtradas",
-    get_total_properties(df_filtered)
+    len(df_filtered)
 )
-
 
 if not df_filtered.empty:
+
     col2.metric(
-    "Precio medio (€)",
-    get_average_price(df_filtered)
-)
-    col3.metric("€/m² medio", round(df_filtered["price_m2"].mean(), 2))
-    col4.metric("Score medio", round(df_filtered["opportunity_score"].mean(), 2))
+        "Precio medio (€)",
+        round(df_filtered["price_eur"].mean(), 2)
+    )
+
+    col3.metric(
+        "€/m² medio",
+        round(df_filtered["price_m2"].mean(), 2)
+    )
+
+    col4.metric(
+        "Score medio",
+        round(df_filtered["opportunity_score"].mean(), 2)
+    )
+
 else:
+
     col2.metric("Precio medio (€)", 0)
     col3.metric("€/m² medio", 0)
     col4.metric("Score medio", 0)
@@ -139,7 +179,11 @@ st.divider()
 st.subheader("🔥 Mejor oportunidad actual")
 
 if not df_filtered.empty:
-    best = get_best_opportunity(df_filtered)
+
+    best = df_filtered.sort_values(
+        by="opportunity_score",
+        ascending=False
+    ).iloc[0]
 
     st.success(
         f"{best['city']} - {best['zone']} | "
@@ -148,8 +192,12 @@ if not df_filtered.empty:
         f"{best['rooms']} habitaciones | "
         f"Score: {best['opportunity_score']}"
     )
+
 else:
-    st.warning("No hay propiedades que cumplan los filtros seleccionados.")
+
+    st.warning(
+        "No hay propiedades que cumplan los filtros seleccionados."
+    )
 
 st.divider()
 
@@ -160,6 +208,7 @@ st.divider()
 st.subheader("Clasificación de oportunidades")
 
 if not df_filtered.empty:
+
     st.dataframe(
         df_filtered.sort_values(
             "opportunity_score",
@@ -167,7 +216,9 @@ if not df_filtered.empty:
         ),
         use_container_width=True
     )
+
 else:
+
     st.info("Ajusta los filtros para ver resultados.")
 
 # ------------------------------------------------------------
@@ -177,6 +228,7 @@ else:
 st.subheader("Top 3 oportunidades")
 
 if not df_filtered.empty:
+
     top3 = df_filtered.sort_values(
         "opportunity_score",
         ascending=False
@@ -195,7 +247,9 @@ if not df_filtered.empty:
         ]],
         use_container_width=True
     )
+
 else:
+
     st.info("No hay datos suficientes para mostrar el Top 3.")
 
 # ------------------------------------------------------------
@@ -205,13 +259,16 @@ else:
 st.subheader("Puntuación de oportunidad por ciudad")
 
 if not df_filtered.empty:
+
     chart_data = df_filtered[[
         "city",
         "opportunity_score"
     ]].set_index("city")
 
     st.bar_chart(chart_data)
+
 else:
+
     st.info("No hay datos para generar el gráfico.")
 
 st.divider()
@@ -223,13 +280,18 @@ st.divider()
 st.subheader("Insight automático")
 
 if not df_filtered.empty:
+
     st.info(
         f"El sistema ha analizado {len(df_filtered)} propiedades filtradas. "
         f"La mejor oportunidad actual se encuentra en {best['city']} "
         f"con una puntuación de {best['opportunity_score']}."
     )
+
 else:
-    st.warning("No se puede generar insight porque no hay datos filtrados.")
+
+    st.warning(
+        "No se puede generar insight porque no hay datos filtrados."
+    )
 
 # ============================================================
 # MAPA COSTA BLANCA
@@ -239,15 +301,17 @@ st.divider()
 
 st.subheader("Mapa Inteligente Costa Blanca")
 
-locations = pd.read_csv(OSM_LOCATIONS_DATASET)
+locations = load_csv(OSM_LOCATIONS_DATASET)
 
 m = create_base_map()
 m = add_location_markers(m, locations)
+
 st_folium(
     m,
     width=1200,
     height=500
 )
+
 # ============================================================
 # RECOMENDACIONES IA
 # ============================================================
@@ -256,7 +320,7 @@ st.divider()
 
 st.subheader("Recomendaciones IA")
 
-recommendations = load_recommendations(RECOMMENDATIONS_DATASET)
+recommendations = load_recommendations()
 
 if has_recommendations(recommendations):
 
@@ -273,5 +337,7 @@ if has_recommendations(recommendations):
         ]],
         use_container_width=True
     )
+
 else:
+
     st.info("No hay recomendaciones disponibles.")

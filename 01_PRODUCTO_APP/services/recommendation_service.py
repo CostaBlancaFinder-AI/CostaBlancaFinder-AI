@@ -5,40 +5,34 @@ Recommendation Service
 ============================================================
 
 Objetivo:
-Centralizar la carga y gestión de recomendaciones IA.
-
-Este módulo evita que el dashboard Streamlit cargue
-directamente archivos CSV de recomendaciones.
+Centralizar la gestión de recomendaciones IA.
 
 Arquitectura:
 Frontend Streamlit
     ↓
 Recommendation Service
     ↓
+Recommendation Repository
+    ↓
 Dataset de recomendaciones
-
-Futuro:
-- recomendaciones personalizadas
-- filtros por perfil de usuario
-- ranking avanzado
-- integración con modelos ML
-- conexión con base de datos
 ============================================================
 """
 
 import pandas as pd
+
+from database.recommendation_repository import load_recommendations_data
 
 
 # ============================================================
 # LOAD RECOMMENDATIONS
 # ============================================================
 
-def load_recommendations(recommendations_path) -> pd.DataFrame:
+def load_recommendations() -> pd.DataFrame:
     """
-    Carga el dataset de recomendaciones IA.
+    Carga el dataset de recomendaciones IA desde el repository.
     """
 
-    return pd.read_csv(recommendations_path)
+    return load_recommendations_data()
 
 
 # ============================================================
@@ -50,4 +44,4 @@ def has_recommendations(df: pd.DataFrame) -> bool:
     Comprueba si existen recomendaciones disponibles.
     """
 
-    return not df.empty
+    return df is not None and not df.empty
