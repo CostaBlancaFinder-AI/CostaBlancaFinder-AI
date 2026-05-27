@@ -3,14 +3,6 @@
 CostaBlancaFinder AI
 Source Manager
 ============================================================
-
-Objetivo:
-Gestionar fuentes inmobiliarias del pipeline principal.
-
-Prioridad:
-1. Fuentes reales desde real_connectors/
-2. Fallback seguro con Idealista Mock
-============================================================
 """
 
 import sys
@@ -37,7 +29,10 @@ def attach_source(properties: list, source_name: str) -> list:
 
     for item in properties:
         item_copy = item.copy()
-        item_copy["source_name"] = source_name
+
+        if not item_copy.get("source_name"):
+            item_copy["source_name"] = source_name
+
         enriched.append(item_copy)
 
     return enriched
@@ -48,9 +43,23 @@ def fetch_from_real_sources() -> list:
     Obtiene propiedades desde conectores reales.
     """
 
-    properties = fetch_all_real_sources()
+    print("\nBuscando propiedades en fuentes reales...")
 
-    return properties
+    try:
+        properties = fetch_all_real_sources()
+
+        if not properties:
+            print("No se recibieron propiedades reales.")
+            return []
+
+        print(f"Propiedades reales obtenidas: {len(properties)}")
+
+        return properties
+
+    except Exception as error:
+        print("Error obteniendo fuentes reales:")
+        print(error)
+        return []
 
 
 def fetch_from_idealista_mock() -> list:
@@ -58,12 +67,18 @@ def fetch_from_idealista_mock() -> list:
     Obtiene propiedades desde Idealista Mock.
     """
 
+    print("\nActivando fallback MOCK...")
+
     properties = search_rentals(DEFAULT_SEARCH_LOCATION)
 
-    return attach_source(
+    properties = attach_source(
         properties,
         "idealista_mock"
     )
+
+    print(f"Propiedades mock obtenidas: {len(properties)}")
+
+    return properties
 
 
 def fetch_all_properties() -> tuple:
@@ -72,25 +87,26 @@ def fetch_all_properties() -> tuple:
     Si no hay datos reales, usa mock como fallback.
     """
 
-    all_properties = []
-
     real_properties = fetch_from_real_sources()
 
     if real_properties:
         print("\nFuentes reales activas.")
-        all_properties.extend(real_properties)
+        all_properties = real_properties
     else:
         print("\nNo se obtuvieron datos reales.")
         print("Usando fallback Idealista Mock.")
-
-        mock_properties = fetch_from_idealista_mock()
-        all_properties.extend(mock_properties)
+        all_properties = fetch_from_idealista_mock()
 
     active_sources = sorted(
-        list(set(
-            item.get("source_name", "unknown")
-            for item in all_properties
-        ))
+        list(
+            set(
+                item.get("source_name", "unknown")
+                for item in all_properties
+            )
+        )
     )
+
+    print(f"Fuentes activas: {active_sources}")
+    print(f"Total propiedades cargadas: {len(all_properties)}")
 
     return all_properties, active_sources
