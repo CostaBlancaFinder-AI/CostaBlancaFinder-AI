@@ -10,7 +10,9 @@ Multi-source ingestion
 → Normalización universal
 → Deduplicación básica
 → Filtros automáticos
+→ Scoring de oportunidad
 → CSV limpio
+→ Top oportunidades
 ============================================================
 """
 
@@ -19,10 +21,13 @@ from save_outputs import save_json, save_csv
 from source_manager import fetch_all_properties
 from deduplicate import deduplicate_properties
 from filter_properties import filter_properties
+from score_properties import score_properties
+from export_opportunities import export_top_opportunities
 from config import (
     DEFAULT_SEARCH_LOCATION,
     RAW_RENTALS_JSON,
-    CLEAN_RENTALS_CSV
+    CLEAN_RENTALS_CSV,
+    TOP_OPPORTUNITIES_CSV
 )
 
 
@@ -80,13 +85,26 @@ def main():
     print("\nFiltros aplicados correctamente.")
     print(f"Registros finales filtrados: {len(filtered_df)}")
 
+    scored_df = score_properties(
+        filtered_df
+    )
+
+    print("\nScoring aplicado correctamente.")
+    print(f"Registros con scoring: {len(scored_df)}")
+
     save_csv(
-        filtered_df,
+        scored_df,
         CLEAN_RENTALS_CSV
     )
 
-    print("\nCSV limpio guardado en:")
+    print("\nCSV limpio con scoring guardado en:")
     print(CLEAN_RENTALS_CSV)
+
+    export_top_opportunities(
+        scored_df,
+        TOP_OPPORTUNITIES_CSV,
+        top_n=10
+    )
 
     print("\nPipeline multifuente finalizado correctamente.")
 
