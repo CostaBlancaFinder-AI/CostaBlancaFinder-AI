@@ -92,7 +92,7 @@ def normalize_property(item: dict, source_name: str) -> dict:
             item,
             ["source_url", "url", "detailUrl", "link"]
         ),
-        "source_name": source_name
+        "source_name": item.get("source_name", source_name)
     }
 
 

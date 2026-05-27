@@ -8,7 +8,8 @@
         "rooms": 2,
         "bathrooms": 1,
         "property_type": "apartment",
-        "source_url": "https://www.idealista.com/mock1"
+        "source_url": "https://www.idealista.com/mock1",
+        "source_name": "idealista_mock"
     },
     {
         "title": "Ático con vistas al mar en Benidorm",
@@ -19,7 +20,8 @@
         "rooms": 3,
         "bathrooms": 2,
         "property_type": "penthouse",
-        "source_url": "https://www.idealista.com/mock2"
+        "source_url": "https://www.idealista.com/mock2",
+        "source_name": "idealista_mock"
     },
     {
         "title": "Estudio económico en Alicante",
@@ -30,6 +32,7 @@
         "rooms": 1,
         "bathrooms": 1,
         "property_type": "studio",
-        "source_url": "https://www.idealista.com/mock3"
+        "source_url": "https://www.idealista.com/mock3",
+        "source_name": "idealista_mock"
     }
 ]
