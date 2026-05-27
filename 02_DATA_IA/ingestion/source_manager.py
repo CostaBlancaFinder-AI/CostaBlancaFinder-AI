@@ -6,10 +6,14 @@ Source Manager
 """
 
 import sys
+import json
 from pathlib import Path
 
 from clients.idealista_client import search_rentals
-from config import DEFAULT_SEARCH_LOCATION
+from config import (
+    DEFAULT_SEARCH_LOCATION,
+    RAW_RENTALS_JSON
+)
 
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
@@ -21,10 +25,6 @@ from real_source_manager import fetch_all_real_sources
 
 
 def attach_source(properties: list, source_name: str) -> list:
-    """
-    Añade source_name a cada propiedad.
-    """
-
     enriched = []
 
     for item in properties:
@@ -39,10 +39,6 @@ def attach_source(properties: list, source_name: str) -> list:
 
 
 def fetch_from_real_sources() -> list:
-    """
-    Obtiene propiedades desde conectores reales.
-    """
-
     print("\nBuscando propiedades en fuentes reales...")
 
     try:
@@ -53,7 +49,6 @@ def fetch_from_real_sources() -> list:
             return []
 
         print(f"Propiedades reales obtenidas: {len(properties)}")
-
         return properties
 
     except Exception as error:
@@ -62,11 +57,48 @@ def fetch_from_real_sources() -> list:
         return []
 
 
-def fetch_from_idealista_mock() -> list:
+def fetch_from_cached_real_json() -> list:
     """
-    Obtiene propiedades desde Idealista Mock.
+    Usa el último rentals_raw.json real guardado si Apify falla.
     """
 
+    print("\nBuscando fallback con JSON real guardado...")
+
+    if not RAW_RENTALS_JSON.exists():
+        print("No existe rentals_raw.json previo.")
+        return []
+
+    try:
+        with open(RAW_RENTALS_JSON, "r", encoding="utf-8") as file:
+            properties = json.load(file)
+
+        if not properties:
+            print("El JSON previo está vacío.")
+            return []
+
+        source_names = {
+            item.get("source_name", "")
+            for item in properties
+        }
+
+        if "idealista_mock" in source_names:
+            print("El JSON previo es MOCK. No se usará como real.")
+            return []
+
+        print(
+            f"Fallback real cargado desde JSON: "
+            f"{len(properties)} propiedades"
+        )
+
+        return properties
+
+    except Exception as error:
+        print("Error leyendo JSON real guardado:")
+        print(error)
+        return []
+
+
+def fetch_from_idealista_mock() -> list:
     print("\nActivando fallback MOCK...")
 
     properties = search_rentals(DEFAULT_SEARCH_LOCATION)
@@ -83,8 +115,10 @@ def fetch_from_idealista_mock() -> list:
 
 def fetch_all_properties() -> tuple:
     """
-    Obtiene propiedades desde fuentes reales.
-    Si no hay datos reales, usa mock como fallback.
+    Prioridad:
+    1. Fuentes reales Apify/API
+    2. JSON real guardado anterior
+    3. Mock
     """
 
     real_properties = fetch_from_real_sources()
@@ -92,10 +126,18 @@ def fetch_all_properties() -> tuple:
     if real_properties:
         print("\nFuentes reales activas.")
         all_properties = real_properties
+
     else:
-        print("\nNo se obtuvieron datos reales.")
-        print("Usando fallback Idealista Mock.")
-        all_properties = fetch_from_idealista_mock()
+        cached_properties = fetch_from_cached_real_json()
+
+        if cached_properties:
+            print("\nUsando fallback con datos reales guardados.")
+            all_properties = cached_properties
+
+        else:
+            print("\nNo se obtuvieron datos reales ni cache real.")
+            print("Usando fallback Idealista Mock.")
+            all_properties = fetch_from_idealista_mock()
 
     active_sources = sorted(
         list(

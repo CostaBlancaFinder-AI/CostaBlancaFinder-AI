@@ -1,6 +1,6 @@
 # CostaBlancaFinder AI — Resumen Ejecutivo
 
-Fecha de generación: 2026-05-27 21:35:46
+Fecha de generación: 2026-05-27 21:41:41
 
 Propiedades analizadas: 3
 Top oportunidades mostradas: 3
