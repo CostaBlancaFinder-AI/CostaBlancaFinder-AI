@@ -48,5 +48,21 @@ DEFAULT_SEARCH_LOCATION = "Costa Blanca"
 APIFY_API_TOKEN = os.getenv("APIFY_API_TOKEN", "").strip()
 APIFY_DATASET_ID = os.getenv("APIFY_DATASET_ID", "").strip()
 
+APIFY_IDEALISTA_ACTOR_ID = os.getenv(
+    "APIFY_IDEALISTA_ACTOR_ID",
+    ""
+).strip()
+
+APIFY_FOTOCASA_ACTOR_ID = os.getenv(
+    "APIFY_FOTOCASA_ACTOR_ID",
+    ""
+).strip()
+
+APIFY_HABITACLIA_ACTOR_ID = os.getenv(
+    "APIFY_HABITACLIA_ACTOR_ID",
+    ""
+).strip()
+
+
 IDEALISTA_API_KEY = os.getenv("IDEALISTA_API_KEY", "").strip()
 IDEALISTA_API_SECRET = os.getenv("IDEALISTA_API_SECRET", "").strip()
