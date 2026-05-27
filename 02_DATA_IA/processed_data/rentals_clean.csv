@@ -1,4 +1,4 @@
 ﻿title,city,zone,price_eur,area_m2,rooms,bathrooms,property_type,source_url,source_name
-Apartamento moderno en Villajoyosa,Villajoyosa,Centro,950,85,2,1,apartment,https://www.idealista.com/mock1,idealista
-Ático con vistas al mar en Benidorm,Benidorm,Playa Levante,1450,110,3,2,penthouse,https://www.idealista.com/mock2,idealista
-Estudio económico en Alicante,Alicante,Centro,650,45,1,1,studio,https://www.idealista.com/mock3,idealista
+Apartamento moderno en Villajoyosa,Villajoyosa,Centro,950,85,2,1,apartment,https://www.idealista.com/mock1,idealista_mock
+Ático con vistas al mar en Benidorm,Benidorm,Playa Levante,1450,110,3,2,penthouse,https://www.idealista.com/mock2,idealista_mock
+Estudio económico en Alicante,Alicante,Centro,650,45,1,1,studio,https://www.idealista.com/mock3,idealista_mock

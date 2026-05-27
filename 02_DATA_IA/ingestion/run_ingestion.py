@@ -3,28 +3,23 @@
 CostaBlancaFinder AI
 Main Ingestion Pipeline
 ============================================================
-
-Objetivo:
-Ejecutar la ingesta automática de propiedades desde
-diferentes fuentes inmobiliarias.
-
-Flujo:
-
-API / SCRAPER
-      ↓
-JSON bruto
-      ↓
-Normalización universal
-      ↓
-CSV limpio
-============================================================
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
+from clients.apify_client import fetch_dataset_items, is_apify_configured
 from clients.idealista_client import search_rentals
 from normalizers.property_normalizer import normalize_properties
 from save_outputs import save_json, save_csv
+
+
+# ============================================================
+# LOAD ENVIRONMENT
+# ============================================================
+
+load_dotenv("config/.env")
 
 
 # ============================================================
@@ -33,13 +28,34 @@ from save_outputs import save_json, save_csv
 
 SEARCH_LOCATION = "Costa Blanca"
 
-RAW_OUTPUT_PATH = Path(
-    "02_DATA_IA/raw_data/rentals_raw.json"
-)
+APIFY_DATASET_ID = os.getenv("APIFY_DATASET_ID", "").strip()
 
-CSV_OUTPUT_PATH = Path(
-    "02_DATA_IA/processed_data/rentals_clean.csv"
-)
+RAW_OUTPUT_PATH = Path("02_DATA_IA/raw_data/rentals_raw.json")
+CSV_OUTPUT_PATH = Path("02_DATA_IA/processed_data/rentals_clean.csv")
+
+
+# ============================================================
+# FETCH DATA
+# ============================================================
+
+def fetch_properties() -> tuple[list, str]:
+    """
+    Obtiene propiedades desde la mejor fuente disponible.
+    """
+
+    if is_apify_configured() and APIFY_DATASET_ID:
+        print("\nFuente seleccionada: Apify")
+        raw_properties = fetch_dataset_items(APIFY_DATASET_ID)
+
+        if raw_properties:
+            return raw_properties, "apify"
+
+        print("Apify no devolvió datos. Se usará fallback Idealista Mock.")
+
+    print("\nFuente seleccionada: Idealista Mock")
+    raw_properties = search_rentals(SEARCH_LOCATION)
+
+    return raw_properties, "idealista_mock"
 
 
 # ============================================================
@@ -57,51 +73,30 @@ def main():
 
     print(f"\nBuscando alquileres en: {SEARCH_LOCATION}")
 
-    # ========================================================
-    # FETCH RAW DATA
-    # ========================================================
-
-    raw_properties = search_rentals(SEARCH_LOCATION)
+    raw_properties, source_name = fetch_properties()
 
     if not raw_properties:
         print("\nNo se han obtenido propiedades.")
         return
 
     print(f"\nPropiedades obtenidas: {len(raw_properties)}")
+    print(f"Fuente: {source_name}")
 
-    # ========================================================
-    # SAVE RAW JSON
-    # ========================================================
+    save_json(raw_properties, RAW_OUTPUT_PATH)
 
-    save_json(
-        raw_properties,
-        RAW_OUTPUT_PATH
-    )
-
-    print(f"\nJSON bruto guardado en:")
+    print("\nJSON bruto guardado en:")
     print(RAW_OUTPUT_PATH)
-
-    # ========================================================
-    # NORMALIZE DATA
-    # ========================================================
 
     normalized_df = normalize_properties(
         raw_properties,
-        source_name="idealista"
+        source_name=source_name
     )
 
     print("\nDatos normalizados correctamente.")
 
-    # ========================================================
-    # SAVE CLEAN CSV
-    # ========================================================
+    save_csv(normalized_df, CSV_OUTPUT_PATH)
 
-    save_csv(
-        normalized_df,
-        CSV_OUTPUT_PATH
-    )
-
-    print(f"\nCSV limpio guardado en:")
+    print("\nCSV limpio guardado en:")
     print(CSV_OUTPUT_PATH)
 
     print("\nPipeline finalizado correctamente.")
