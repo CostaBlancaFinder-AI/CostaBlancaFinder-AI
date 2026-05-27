@@ -3,16 +3,34 @@
 CostaBlancaFinder AI
 Source Manager
 ============================================================
+
+Objetivo:
+Gestionar fuentes inmobiliarias del pipeline principal.
+
+Prioridad:
+1. Fuentes reales desde real_connectors/
+2. Fallback seguro con Idealista Mock
+============================================================
 """
 
-from clients.apify_client import fetch_dataset_items, is_apify_configured
+import sys
+from pathlib import Path
+
 from clients.idealista_client import search_rentals
-from config import APIFY_DATASET_ID, DEFAULT_SEARCH_LOCATION
+from config import DEFAULT_SEARCH_LOCATION
+
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+REAL_CONNECTORS_DIR = ROOT_DIR / "02_DATA_IA" / "real_connectors"
+
+sys.path.append(str(REAL_CONNECTORS_DIR))
+
+from real_source_manager import fetch_all_real_sources
 
 
 def attach_source(properties: list, source_name: str) -> list:
     """
-    Añade el nombre de la fuente a cada propiedad.
+    Añade source_name a cada propiedad.
     """
 
     enriched = []
@@ -25,49 +43,48 @@ def attach_source(properties: list, source_name: str) -> list:
     return enriched
 
 
-def fetch_from_apify() -> list:
+def fetch_from_real_sources() -> list:
     """
-    Obtiene propiedades desde Apify.
+    Obtiene propiedades desde conectores reales.
     """
 
-    if not is_apify_configured():
-        return []
+    properties = fetch_all_real_sources()
 
-    if not APIFY_DATASET_ID:
-        return []
-
-    properties = fetch_dataset_items(APIFY_DATASET_ID)
-
-    return attach_source(properties, "apify")
+    return properties
 
 
-def fetch_from_idealista() -> list:
+def fetch_from_idealista_mock() -> list:
     """
-    Obtiene propiedades desde Idealista Mock/API.
+    Obtiene propiedades desde Idealista Mock.
     """
 
     properties = search_rentals(DEFAULT_SEARCH_LOCATION)
 
-    return attach_source(properties, "idealista_mock")
+    return attach_source(
+        properties,
+        "idealista_mock"
+    )
 
 
 def fetch_all_properties() -> tuple:
     """
-    Obtiene propiedades desde todas las fuentes disponibles.
+    Obtiene propiedades desde fuentes reales.
+    Si no hay datos reales, usa mock como fallback.
     """
 
     all_properties = []
 
-    sources = [
-        fetch_from_apify,
-        fetch_from_idealista
-    ]
+    real_properties = fetch_from_real_sources()
 
-    for source_fetcher in sources:
-        properties = source_fetcher()
+    if real_properties:
+        print("\nFuentes reales activas.")
+        all_properties.extend(real_properties)
+    else:
+        print("\nNo se obtuvieron datos reales.")
+        print("Usando fallback Idealista Mock.")
 
-        if properties:
-            all_properties.extend(properties)
+        mock_properties = fetch_from_idealista_mock()
+        all_properties.extend(mock_properties)
 
     active_sources = sorted(
         list(set(
