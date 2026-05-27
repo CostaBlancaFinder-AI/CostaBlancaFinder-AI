@@ -3,17 +3,6 @@
 CostaBlancaFinder AI
 Main Ingestion Pipeline
 ============================================================
-
-Flujo:
-Multi-source ingestion
-→ JSON bruto
-→ Normalización universal
-→ Deduplicación básica
-→ Filtros automáticos
-→ Scoring de oportunidad
-→ CSV limpio
-→ Top oportunidades
-============================================================
 """
 
 from normalizers.property_normalizer import normalize_properties
@@ -23,19 +12,17 @@ from deduplicate import deduplicate_properties
 from filter_properties import filter_properties
 from score_properties import score_properties
 from export_opportunities import export_top_opportunities
+from export_summary import export_executive_summary
 from config import (
     DEFAULT_SEARCH_LOCATION,
     RAW_RENTALS_JSON,
     CLEAN_RENTALS_CSV,
-    TOP_OPPORTUNITIES_CSV
+    TOP_OPPORTUNITIES_CSV,
+    EXECUTIVE_SUMMARY_MD
 )
 
 
 def main():
-    """
-    Ejecuta pipeline completo de ingesta multifuente.
-    """
-
     print("=" * 60)
     print("CostaBlancaFinder AI - Multi-Source Ingestion Pipeline")
     print("=" * 60)
@@ -51,10 +38,7 @@ def main():
     print(f"\nPropiedades obtenidas: {len(raw_properties)}")
     print(f"Fuentes activas: {active_sources}")
 
-    save_json(
-        raw_properties,
-        RAW_RENTALS_JSON
-    )
+    save_json(raw_properties, RAW_RENTALS_JSON)
 
     print("\nJSON bruto guardado en:")
     print(RAW_RENTALS_JSON)
@@ -67,9 +51,7 @@ def main():
     print("\nDatos normalizados correctamente.")
     print(f"Registros normalizados: {len(normalized_df)}")
 
-    deduplicated_df = deduplicate_properties(
-        normalized_df
-    )
+    deduplicated_df = deduplicate_properties(normalized_df)
 
     print("\nDuplicados eliminados correctamente.")
     print(f"Registros tras deduplicación: {len(deduplicated_df)}")
@@ -85,17 +67,12 @@ def main():
     print("\nFiltros aplicados correctamente.")
     print(f"Registros finales filtrados: {len(filtered_df)}")
 
-    scored_df = score_properties(
-        filtered_df
-    )
+    scored_df = score_properties(filtered_df)
 
     print("\nScoring aplicado correctamente.")
     print(f"Registros con scoring: {len(scored_df)}")
 
-    save_csv(
-        scored_df,
-        CLEAN_RENTALS_CSV
-    )
+    save_csv(scored_df, CLEAN_RENTALS_CSV)
 
     print("\nCSV limpio con scoring guardado en:")
     print(CLEAN_RENTALS_CSV)
@@ -104,6 +81,12 @@ def main():
         scored_df,
         TOP_OPPORTUNITIES_CSV,
         top_n=10
+    )
+
+    export_executive_summary(
+        scored_df,
+        EXECUTIVE_SUMMARY_MD,
+        top_n=5
     )
 
     print("\nPipeline multifuente finalizado correctamente.")
