@@ -5,6 +5,9 @@ Main Ingestion Pipeline
 ============================================================
 """
 
+import sys
+from pathlib import Path
+
 from normalizers.property_normalizer import normalize_properties
 from save_outputs import save_json, save_csv
 from source_manager import fetch_all_properties
@@ -23,6 +26,17 @@ from config import (
 )
 
 
+ROOT_DIR = Path(__file__).resolve().parents[2]
+DATABASE_DIR = ROOT_DIR / "02_DATA_IA" / "database"
+
+sys.path.append(str(DATABASE_DIR))
+
+from property_db_repository import (
+    save_properties_to_db,
+    count_properties
+)
+
+
 def main():
 
     print("=" * 60)
@@ -30,10 +44,6 @@ def main():
     print("=" * 60)
 
     print(f"\nBuscando alquileres en: {DEFAULT_SEARCH_LOCATION}")
-
-    # ========================================================
-    # FETCH PROPERTIES
-    # ========================================================
 
     raw_properties, active_sources = fetch_all_properties()
 
@@ -44,18 +54,10 @@ def main():
     print(f"\nPropiedades obtenidas: {len(raw_properties)}")
     print(f"Fuentes activas: {active_sources}")
 
-    # ========================================================
-    # SAVE RAW JSON
-    # ========================================================
-
     save_json(raw_properties, RAW_RENTALS_JSON)
 
     print("\nJSON bruto guardado en:")
     print(RAW_RENTALS_JSON)
-
-    # ========================================================
-    # NORMALIZATION
-    # ========================================================
 
     normalized_df = normalize_properties(
         raw_properties,
@@ -68,10 +70,6 @@ def main():
     if normalized_df.empty:
         print("\nERROR: DataFrame normalizado vacío.")
         return
-
-    # ========================================================
-    # DEDUPLICATION
-    # ========================================================
 
     deduplicated_df = deduplicate_properties(
         normalized_df
@@ -86,10 +84,6 @@ def main():
     if deduplicated_df.empty:
         print("\nERROR: DataFrame vacío tras deduplicación.")
         return
-
-    # ========================================================
-    # FILTERS
-    # ========================================================
 
     filtered_df = filter_properties(
         deduplicated_df,
@@ -109,10 +103,6 @@ def main():
         print("\nWARNING: No quedan propiedades tras filtros.")
         return
 
-    # ========================================================
-    # SCORING
-    # ========================================================
-
     scored_df = score_properties(filtered_df)
 
     print("\nScoring aplicado correctamente.")
@@ -125,18 +115,10 @@ def main():
         print("\nERROR: DataFrame vacío tras scoring.")
         return
 
-    # ========================================================
-    # SAVE CLEAN CSV
-    # ========================================================
-
     save_csv(scored_df, CLEAN_RENTALS_CSV)
 
     print("\nCSV limpio con scoring guardado en:")
     print(CLEAN_RENTALS_CSV)
-
-    # ========================================================
-    # EXPORT OPPORTUNITIES
-    # ========================================================
 
     export_top_opportunities(
         scored_df,
@@ -147,10 +129,6 @@ def main():
     print("\nTop oportunidades exportadas en:")
     print(TOP_OPPORTUNITIES_CSV)
 
-    # ========================================================
-    # EXECUTIVE SUMMARY
-    # ========================================================
-
     export_executive_summary(
         scored_df,
         EXECUTIVE_SUMMARY_MD,
@@ -160,9 +138,13 @@ def main():
     print("\nResumen ejecutivo exportado en:")
     print(EXECUTIVE_SUMMARY_MD)
 
-    # ========================================================
-    # PIPELINE COMPLETE
-    # ========================================================
+    print("\nGuardando propiedades en PostgreSQL / Supabase...")
+
+    save_properties_to_db(scored_df)
+
+    total_db = count_properties()
+
+    print(f"Total propiedades en base de datos: {total_db}")
 
     print("\n====================================================")
     print("PIPELINE MULTIFUENTE FINALIZADO CORRECTAMENTE")
