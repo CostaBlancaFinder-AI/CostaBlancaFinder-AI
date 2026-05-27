@@ -1,0 +1,35 @@
+[
+    {
+        "title": "Apartamento moderno en Villajoyosa",
+        "city": "Villajoyosa",
+        "zone": "Centro",
+        "price_eur": 950,
+        "area_m2": 85,
+        "rooms": 2,
+        "bathrooms": 1,
+        "property_type": "apartment",
+        "source_url": "https://www.idealista.com/mock1"
+    },
+    {
+        "title": "Ático con vistas al mar en Benidorm",
+        "city": "Benidorm",
+        "zone": "Playa Levante",
+        "price_eur": 1450,
+        "area_m2": 110,
+        "rooms": 3,
+        "bathrooms": 2,
+        "property_type": "penthouse",
+        "source_url": "https://www.idealista.com/mock2"
+    },
+    {
+        "title": "Estudio económico en Alicante",
+        "city": "Alicante",
+        "zone": "Centro",
+        "price_eur": 650,
+        "area_m2": 45,
+        "rooms": 1,
+        "bathrooms": 1,
+        "property_type": "studio",
+        "source_url": "https://www.idealista.com/mock3"
+    }
+]
