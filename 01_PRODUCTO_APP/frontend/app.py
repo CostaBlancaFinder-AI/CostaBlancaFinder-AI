@@ -1,6 +1,6 @@
 # ============================================================
 # CostaBlancaFinder AI
-# Streamlit Dashboard V2
+# Streamlit Dashboard V3
 # ============================================================
 
 import streamlit as st
@@ -30,12 +30,6 @@ from settings import APP_NAME
 # SERVICES IMPORTS
 # ============================================================
 
-from analytics_service import (
-    get_total_properties,
-    get_average_price,
-    get_best_opportunity,
-)
-
 from recommendation_service import (
     load_recommendations,
     has_recommendations,
@@ -54,6 +48,9 @@ from scoring_service import (
     get_average_opportunity_score,
     get_average_price_m2,
     get_average_price_from_df,
+    get_average_value_score,
+    get_average_comfort_score,
+    get_average_quality_score,
 )
 
 # ============================================================
@@ -63,9 +60,9 @@ from scoring_service import (
 from database.property_repository import load_properties
 from database.location_repository import load_locations
 
-# ------------------------------------------------------------
-# CONFIGURACIÓN GENERAL
-# ------------------------------------------------------------
+# ============================================================
+# PAGE CONFIG
+# ============================================================
 
 st.set_page_config(
     page_title="CostaBlancaFinder AI",
@@ -73,27 +70,27 @@ st.set_page_config(
     layout="wide"
 )
 
-# ------------------------------------------------------------
-# CARGA DE DATOS
-# ------------------------------------------------------------
+# ============================================================
+# LOAD DATA
+# ============================================================
 
 df = load_properties()
 
-# ------------------------------------------------------------
+# ============================================================
 # SIDEBAR
-# ------------------------------------------------------------
+# ============================================================
 
 st.sidebar.title("🏖️ CostaBlancaFinder AI")
 
 st.sidebar.markdown("""
-Panel inteligente de oportunidades inmobiliarias en la Costa Blanca.
+Plataforma inteligente de oportunidades inmobiliarias.
 """)
 
 st.sidebar.header("Filtros")
 
 city_filter = st.sidebar.selectbox(
     "Ciudad",
-    ["Todas"] + sorted(df["city"].unique().tolist())
+    ["Todas"] + sorted(df["city"].dropna().unique().tolist())
 )
 
 max_price = st.sidebar.slider(
@@ -105,12 +102,12 @@ max_price = st.sidebar.slider(
 
 rooms_filter = st.sidebar.selectbox(
     "Habitaciones mínimas",
-    sorted(df["rooms"].unique().tolist())
+    sorted(df["rooms"].dropna().unique().tolist())
 )
 
-# ------------------------------------------------------------
-# FILTRADO DE DATOS
-# ------------------------------------------------------------
+# ============================================================
+# FILTER DATA
+# ============================================================
 
 df_filtered = filter_properties(
     df=df,
@@ -119,28 +116,28 @@ df_filtered = filter_properties(
     min_rooms=rooms_filter
 )
 
-# ------------------------------------------------------------
-# CABECERA PRINCIPAL
-# ------------------------------------------------------------
+# ============================================================
+# MAIN HEADER
+# ============================================================
 
 st.title("🏖️ CostaBlancaFinder AI")
-st.subheader("Panel de Inteligencia de Mercado V2")
+st.subheader("AI Real Estate Intelligence Platform")
 
 st.markdown("""
-Plataforma inteligente para detectar oportunidades inmobiliarias
-en la Costa Blanca utilizando análisis de datos e IA.
+Sistema inteligente para detectar oportunidades inmobiliarias
+mediante scoring multicriterio, análisis de valor y confort.
 """)
 
 st.divider()
 
-# ------------------------------------------------------------
-# MÉTRICAS PRINCIPALES
-# ------------------------------------------------------------
+# ============================================================
+# MAIN METRICS
+# ============================================================
 
 col1, col2, col3, col4 = st.columns(4)
 
 col1.metric(
-    "Propiedades filtradas",
+    "Propiedades",
     len(df_filtered)
 )
 
@@ -148,103 +145,157 @@ if not df_filtered.empty:
 
     col2.metric(
         "Precio medio (€)",
-        get_average_price_from_df(df_filtered)
+        round(get_average_price_from_df(df_filtered), 0)
     )
 
     col3.metric(
-    "€/m² medio",
-    get_average_price_m2(df_filtered)
+        "€/m² medio",
+        round(get_average_price_m2(df_filtered), 2)
     )
 
     col4.metric(
-    "Score medio",
-    get_average_opportunity_score(df_filtered)
+        "Opportunity Score",
+        round(get_average_opportunity_score(df_filtered), 2)
     )
 
 else:
 
     col2.metric("Precio medio (€)", 0)
     col3.metric("€/m² medio", 0)
-    col4.metric("Score medio", 0)
+    col4.metric("Opportunity Score", 0)
+
+# ============================================================
+# SECONDARY METRICS
+# ============================================================
+
+if not df_filtered.empty:
+
+    st.divider()
+
+    col5, col6, col7 = st.columns(3)
+
+    col5.metric(
+        "Value Score",
+        round(get_average_value_score(df_filtered), 2)
+    )
+
+    col6.metric(
+        "Comfort Score",
+        round(get_average_comfort_score(df_filtered), 2)
+    )
+
+    col7.metric(
+        "Quality Score",
+        round(get_average_quality_score(df_filtered), 2)
+    )
+
+# ============================================================
+# BEST OPPORTUNITY
+# ============================================================
 
 st.divider()
 
-# ------------------------------------------------------------
-# MEJOR OPORTUNIDAD
-# ------------------------------------------------------------
-
-st.subheader("🔥 Mejor oportunidad actual")
+st.subheader("🔥 Mejor oportunidad detectada")
 
 if not df_filtered.empty:
 
     best = get_best_opportunity_from_df(df_filtered)
 
     st.success(
-        f"{best['city']} - {best['zone']} | "
-        f"{best['price_eur']} € | "
-        f"{best['area_m2']} m² | "
-        f"{best['rooms']} habitaciones | "
-        f"Score: {best['opportunity_score']}"
+        f"""
+🏆 {best['city']} - {best['zone']}
+
+💰 {best['price_eur']} €
+📐 {best['area_m2']} m²
+🛏️ {best['rooms']} habitaciones
+📊 Opportunity Score: {best['opportunity_score']}
+
+💎 Value Score: {round(best['value_score'], 2)}
+🌴 Comfort Score: {round(best['comfort_score'], 2)}
+📸 Quality Score: {round(best['quality_score'], 2)}
+"""
     )
 
 else:
 
     st.warning(
-        "No hay propiedades que cumplan los filtros seleccionados."
+        "No hay propiedades que cumplan los filtros."
     )
+
+# ============================================================
+# MAIN TABLE
+# ============================================================
 
 st.divider()
 
-# ------------------------------------------------------------
-# TABLA PRINCIPAL
-# ------------------------------------------------------------
-
-st.subheader("Clasificación de oportunidades")
+st.subheader("🏆 Ranking Inteligente")
 
 if not df_filtered.empty:
 
-    st.dataframe(
-        get_top_opportunities(df_filtered, top_n=len(df_filtered)),
-        use_container_width=True
+    ranking_df = get_top_opportunities(
+        df_filtered,
+        top_n=len(df_filtered)
     )
 
-else:
-
-    st.info("Ajusta los filtros para ver resultados.")
-
-# ------------------------------------------------------------
-# TOP 3 OPORTUNIDADES
-# ------------------------------------------------------------
-
-st.subheader("Top 3 oportunidades")
-
-if not df_filtered.empty:
-
-    top3 = get_top_opportunities(df_filtered)
-
     st.dataframe(
-        top3[[
+        ranking_df[[
             "city",
             "zone",
             "title",
             "price_eur",
             "area_m2",
             "rooms",
-            "price_m2",
-            "opportunity_score"
+            "price_by_m2",
+            "value_score",
+            "comfort_score",
+            "quality_score",
+            "opportunity_score",
+            "opportunity_level"
         ]],
         use_container_width=True
     )
 
 else:
 
-    st.info("No hay datos suficientes para mostrar el Top 3.")
+    st.info("No hay resultados.")
 
-# ------------------------------------------------------------
-# GRÁFICO
-# ------------------------------------------------------------
+# ============================================================
+# TOP 3 CARDS
+# ============================================================
 
-st.subheader("Puntuación de oportunidad por ciudad")
+st.divider()
+
+st.subheader("🥇 Top 3 oportunidades")
+
+if not df_filtered.empty:
+
+    top3 = get_top_opportunities(df_filtered, top_n=3)
+
+    for _, row in top3.iterrows():
+
+        st.markdown("---")
+
+        st.markdown(
+            f"""
+### 🏠 {row['title']}
+
+📍 {row['city']} — {row['zone']}
+
+💰 {row['price_eur']} €  
+📐 {row['area_m2']} m²  
+🛏️ {row['rooms']} habitaciones  
+📊 Opportunity Score: **{row['opportunity_score']}**  
+🏅 Nivel: **{row['opportunity_level']}**
+"""
+        )
+
+# ============================================================
+# CHART
+# ============================================================
+
+st.divider()
+
+st.subheader("📈 Opportunity Score por ciudad")
 
 if not df_filtered.empty:
 
@@ -255,39 +306,48 @@ if not df_filtered.empty:
 
     st.bar_chart(chart_data)
 
-else:
-
-    st.info("No hay datos para generar el gráfico.")
+# ============================================================
+# AI INSIGHT
+# ============================================================
 
 st.divider()
 
-# ------------------------------------------------------------
-# INSIGHT AUTOMÁTICO
-# ------------------------------------------------------------
-
-st.subheader("Insight automático")
+st.subheader("🤖 Insight IA")
 
 if not df_filtered.empty:
 
-    st.info(
-        f"El sistema ha analizado {len(df_filtered)} propiedades filtradas. "
-        f"La mejor oportunidad actual se encuentra en {best['city']} "
-        f"con una puntuación de {best['opportunity_score']}."
+    best_city = (
+        df_filtered
+        .sort_values(
+            by="opportunity_score",
+            ascending=False
+        )
+        .iloc[0]["city"]
     )
 
-else:
+    st.info(
+        f"""
+El sistema ha analizado {len(df_filtered)} propiedades.
 
-    st.warning(
-        "No se puede generar insight porque no hay datos filtrados."
+La ciudad con mejores oportunidades actuales es:
+🏆 {best_city}
+
+El modelo detecta oportunidades combinando:
+- valor económico,
+- precio/m²,
+- confort,
+- amenities,
+- calidad del anuncio.
+"""
     )
 
 # ============================================================
-# MAPA COSTA BLANCA
+# MAP
 # ============================================================
 
 st.divider()
 
-st.subheader("Mapa Inteligente Costa Blanca")
+st.subheader("🗺️ Mapa Inteligente Costa Blanca")
 
 locations = load_locations()
 
@@ -301,12 +361,12 @@ st_folium(
 )
 
 # ============================================================
-# RECOMENDACIONES IA
+# AI RECOMMENDATIONS
 # ============================================================
 
 st.divider()
 
-st.subheader("Recomendaciones IA")
+st.subheader("🤖 Recomendaciones IA")
 
 recommendations = load_recommendations()
 
