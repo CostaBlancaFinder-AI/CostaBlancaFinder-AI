@@ -3,11 +3,6 @@
 CostaBlancaFinder AI
 Property Repository
 ============================================================
-
-Objetivo:
-Cargar las propiedades procesadas por el pipeline de IA
-para mostrarlas en el dashboard Streamlit.
-============================================================
 """
 
 from pathlib import Path
@@ -33,30 +28,58 @@ def load_properties() -> pd.DataFrame:
 
     if not RENTALS_CLEAN_CSV.exists():
         raise FileNotFoundError(
-            f"No existe el archivo de propiedades: {RENTALS_CLEAN_CSV}"
+            f"No existe el archivo: {RENTALS_CLEAN_CSV}"
         )
 
     df = pd.read_csv(RENTALS_CLEAN_CSV)
 
+    # ========================================================
+    # NUMERIC COLUMNS
+    # ========================================================
+
     numeric_columns = [
         "price_eur",
+        "price_by_m2",
         "area_m2",
         "rooms",
         "bathrooms",
         "price_score",
+        "price_m2_score",
         "area_score",
         "rooms_score",
+        "value_score",
+        "comfort_score",
+        "quality_score",
         "opportunity_score"
     ]
 
     for column in numeric_columns:
+
         if column in df.columns:
+
             df[column] = pd.to_numeric(
                 df[column],
                 errors="coerce"
             )
 
-    if "price_m2" not in df.columns:
-        df["price_m2"] = df["price_eur"] / df["area_m2"]
+    # ========================================================
+    # FALLBACK PRICE_BY_M2
+    # ========================================================
+
+    if "price_by_m2" not in df.columns:
+
+        df["price_by_m2"] = (
+            df["price_eur"] / df["area_m2"]
+        )
+
+    # ========================================================
+    # CLEAN DIVISION ERRORS
+    # ========================================================
+
+    df["price_by_m2"] = (
+        df["price_by_m2"]
+        .replace([float("inf"), -float("inf")], 0)
+        .fillna(0)
+    )
 
     return df
