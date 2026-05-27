@@ -7,12 +7,6 @@ Apify Idealista Connector
 Objetivo:
 Preparar el conector real para obtener propiedades de
 Idealista mediante Apify.
-
-Estado actual:
-- Estructura preparada.
-- No lanza todavía actores automáticamente.
-- Lee configuración desde ingestion/config.py.
-- Devuelve lista vacía si no hay configuración real.
 ============================================================
 """
 
@@ -27,10 +21,10 @@ INGESTION_DIR = ROOT_DIR / "02_DATA_IA" / "ingestion"
 
 sys.path.append(str(INGESTION_DIR))
 
-from config import APIFY_API_TOKEN
-
-
-APIFY_IDEALISTA_ACTOR_ID = ""
+from config import (
+    APIFY_API_TOKEN,
+    APIFY_IDEALISTA_ACTOR_ID
+)
 
 
 def is_configured() -> bool:
@@ -38,15 +32,17 @@ def is_configured() -> bool:
     Comprueba si el conector tiene configuración mínima.
     """
 
-    return bool(APIFY_API_TOKEN and APIFY_IDEALISTA_ACTOR_ID)
+    return bool(
+        APIFY_API_TOKEN and
+        APIFY_IDEALISTA_ACTOR_ID
+    )
 
 
 def fetch_idealista_properties() -> list:
     """
     Obtiene propiedades reales desde Idealista vía Apify.
 
-    En esta primera versión, si no hay actor configurado,
-    devuelve lista vacía sin romper el sistema.
+    Si no hay configuración real, devuelve lista vacía.
     """
 
     print("\n[Real Connector] Apify Idealista")
@@ -56,10 +52,11 @@ def fetch_idealista_properties() -> list:
         return []
 
     if not APIFY_IDEALISTA_ACTOR_ID:
-        print("APIFY_IDEALISTA_ACTOR_ID no configurado todavía.")
+        print("APIFY_IDEALISTA_ACTOR_ID no configurado.")
         return []
 
-    print("Conector preparado, pero ejecución de actor pendiente.")
+    print("Conector configurado correctamente.")
+    print("Ejecución real del actor pendiente de implementar.")
 
     return []
 
