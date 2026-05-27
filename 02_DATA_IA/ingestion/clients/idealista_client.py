@@ -3,16 +3,17 @@
 CostaBlancaFinder AI
 Idealista Client
 ============================================================
+
+Objetivo:
+Cliente de conexión con Idealista.
+
+Estado actual:
+- Modo MOCK funcional.
+- Preparado para futura API real.
+============================================================
 """
 
-import os
-from dotenv import load_dotenv
-
-
-load_dotenv("config/.env")
-
-IDEALISTA_API_KEY = os.getenv("IDEALISTA_API_KEY", "").strip()
-IDEALISTA_API_SECRET = os.getenv("IDEALISTA_API_SECRET", "").strip()
+from config import IDEALISTA_API_KEY, IDEALISTA_API_SECRET
 
 
 MOCK_PROPERTIES = [
@@ -52,17 +53,26 @@ MOCK_PROPERTIES = [
 ]
 
 
+def has_idealista_credentials() -> bool:
+    """
+    Comprueba si existen credenciales completas de Idealista.
+    """
+
+    return bool(IDEALISTA_API_KEY and IDEALISTA_API_SECRET)
+
+
 def search_rentals(location: str) -> list:
     """
-    Busca alquileres en una localización.
+    Busca alquileres en Idealista.
 
-    Si no hay credenciales reales completas, usa MOCK DATA.
+    Si no hay API real implementada, devuelve MOCK DATA
+    para mantener funcionando el pipeline.
     """
 
     print("\n[Idealista Client]")
     print(f"Buscando alquileres en: {location}")
 
-    if not IDEALISTA_API_KEY or not IDEALISTA_API_SECRET:
+    if not has_idealista_credentials():
         print("\nModo MOCK activado.")
         print("No hay credenciales reales completas de Idealista.")
         return MOCK_PROPERTIES
