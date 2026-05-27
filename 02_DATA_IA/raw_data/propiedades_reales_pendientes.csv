@@ -1,1 +1,4 @@
 capture_date,title,city,zone,price_eur,area_m2,rooms,bathrooms,property_type,source_name,source_url,notes,status
+2026-05-26,Apartamento cerca de playa,Benidorm,Levante,850,70,2,1,apartment,Idealista,https://example.com,Prueba real inicial,validated
+2026-05-26,Piso con vistas al mar,Villajoyosa,Centro,780,65,2,1,apartment,Idealista,https://example.com,Prueba real,validated
+2026-05-26,Ático en zona turística,Finestrat,Cala de Finestrat,950,80,3,2,penthouse,Idealista,https://example.com,Prueba real,validated

@@ -1,6 +1,4 @@
 title,city,zone,price_eur,area_m2,rooms,bathrooms,property_type,source_url,source_name
-Apartamento cerca de playa,Benidorm,Levante,850,70,2,1,apartment,https://example.com,manual
-Piso con vistas al mar,Villajoyosa,Centro,780,65,2,1,apartment,https://example.com,manual
-Ático en zona turística,Finestrat,Cala de Finestrat,950,80,3,2,penthouse,https://example.com,manual
-Piso económico,Altea,Centro,700,60,2,1,apartment,https://example.com,manual
-Apartamento familiar,Calpe,Playa Arenal,900,75,3,2,apartment,https://example.com,manual
+Apartamento cerca de playa,Benidorm,Levante,850,70,2,1,apartment,https://example.com,Idealista
+Piso con vistas al mar,Villajoyosa,Centro,780,65,2,1,apartment,https://example.com,Idealista
+Ático en zona turística,Finestrat,Cala de Finestrat,950,80,3,2,penthouse,https://example.com,Idealista
