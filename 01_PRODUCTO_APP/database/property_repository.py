@@ -5,33 +5,44 @@ Property Repository
 ============================================================
 """
 
+import sys
 from pathlib import Path
 
 import pandas as pd
+from sqlalchemy import text
 
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
-PROCESSED_DATA_PATH = (
-    ROOT_DIR / "02_DATA_IA" / "processed_data"
-)
+DATABASE_DIR = ROOT_DIR / "02_DATA_IA" / "database"
 
-RENTALS_CLEAN_CSV = (
-    PROCESSED_DATA_PATH / "rentals_clean.csv"
-)
+sys.path.append(str(DATABASE_DIR))
+
+from db_config import get_engine
+
+
+TABLE_NAME = "properties"
 
 
 def load_properties() -> pd.DataFrame:
     """
-    Carga el dataset limpio generado por el pipeline.
+    Carga propiedades directamente desde PostgreSQL/Supabase.
     """
 
-    if not RENTALS_CLEAN_CSV.exists():
-        raise FileNotFoundError(
-            f"No existe el archivo: {RENTALS_CLEAN_CSV}"
-        )
+    engine = get_engine()
 
-    df = pd.read_csv(RENTALS_CLEAN_CSV)
+    query = text(
+        f"""
+        SELECT *
+        FROM {TABLE_NAME}
+        ORDER BY opportunity_score DESC
+        """
+    )
+
+    df = pd.read_sql(query, engine)
+
+    if df.empty:
+        return df
 
     # ========================================================
     # NUMERIC COLUMNS
@@ -63,23 +74,18 @@ def load_properties() -> pd.DataFrame:
             )
 
     # ========================================================
-    # FALLBACK PRICE_BY_M2
+    # CLEAN NaN / INF
     # ========================================================
 
-    if "price_by_m2" not in df.columns:
+    if "price_by_m2" in df.columns:
 
         df["price_by_m2"] = (
-            df["price_eur"] / df["area_m2"]
+            df["price_by_m2"]
+            .replace(
+                [float("inf"), -float("inf")],
+                0
+            )
+            .fillna(0)
         )
-
-    # ========================================================
-    # CLEAN DIVISION ERRORS
-    # ========================================================
-
-    df["price_by_m2"] = (
-        df["price_by_m2"]
-        .replace([float("inf"), -float("inf")], 0)
-        .fillna(0)
-    )
 
     return df

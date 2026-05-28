@@ -3,6 +3,28 @@
 CostaBlancaFinder AI
 Main Ingestion Pipeline
 ============================================================
+
+Author:
+George Apolo Gallardo
+
+Project:
+CostaBlancaFinder AI
+
+Description:
+Main ingestion pipeline responsible for collecting property
+data, normalizing records, applying deduplication, filtering,
+AI-based scoring, exporting artifacts and persisting results
+into PostgreSQL/Supabase.
+
+Architecture:
+PropTech + AI + PostgreSQL + Supabase + Streamlit
+
+Created:
+2026
+
+Status:
+MVP / Production-oriented architecture
+============================================================
 """
 
 import sys
@@ -33,7 +55,8 @@ sys.path.append(str(DATABASE_DIR))
 
 from property_db_repository import (
     save_properties_to_db,
-    count_properties
+    count_properties,
+    count_price_history
 )
 
 
@@ -143,8 +166,10 @@ def main():
     save_properties_to_db(scored_df)
 
     total_db = count_properties()
+    total_history = count_price_history()
 
-    print(f"Total propiedades en base de datos: {total_db}")
+    print(f"Total propiedades activas en base de datos: {total_db}")
+    print(f"Total registros históricos de precios: {total_history}")
 
     print("\n====================================================")
     print("PIPELINE MULTIFUENTE FINALIZADO CORRECTAMENTE")
