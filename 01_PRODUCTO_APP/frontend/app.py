@@ -1,12 +1,38 @@
-# ============================================================
-# CostaBlancaFinder AI
-# Streamlit Dashboard V3
-# ============================================================
+"""
+============================================================
+CostaBlancaFinder AI
+Streamlit Dashboard
+============================================================
 
-import streamlit as st
+Author:
+George Apolo Gallardo
+
+Project:
+CostaBlancaFinder AI
+
+Description:
+Professional Streamlit dashboard for visualizing real estate
+opportunities, AI-based scoring metrics, PostgreSQL/Supabase
+data, ingestion pipeline status and intelligent property
+recommendations.
+
+Architecture:
+PropTech + AI + PostgreSQL + Supabase + Streamlit
+
+Created:
+2026
+
+Status:
+MVP / Production-oriented architecture
+============================================================
+"""
+
 import sys
 from pathlib import Path
+
+import streamlit as st
 from streamlit_folium import st_folium
+
 
 # ============================================================
 # ROOT CONFIGURATION
@@ -20,11 +46,13 @@ sys.path.append(str(APP_DIR / "config"))
 sys.path.append(str(APP_DIR / "services"))
 sys.path.append(str(APP_DIR / "utils"))
 
+
 # ============================================================
 # CONFIG IMPORTS
 # ============================================================
 
 from settings import APP_NAME
+
 
 # ============================================================
 # SERVICES IMPORTS
@@ -53,12 +81,18 @@ from scoring_service import (
     get_average_quality_score,
 )
 
+from ingestion_monitoring_service import (
+    get_last_ingestion_summary,
+)
+
+
 # ============================================================
 # DATABASE IMPORTS
 # ============================================================
 
 from database.property_repository import load_properties
 from database.location_repository import load_locations
+
 
 # ============================================================
 # PAGE CONFIG
@@ -67,14 +101,16 @@ from database.location_repository import load_locations
 st.set_page_config(
     page_title="CostaBlancaFinder AI",
     page_icon="🏖️",
-    layout="wide"
+    layout="wide",
 )
+
 
 # ============================================================
 # LOAD DATA
 # ============================================================
 
 df = load_properties()
+
 
 # ============================================================
 # SIDEBAR
@@ -90,20 +126,21 @@ st.sidebar.header("Filtros")
 
 city_filter = st.sidebar.selectbox(
     "Ciudad",
-    ["Todas"] + sorted(df["city"].dropna().unique().tolist())
+    ["Todas"] + sorted(df["city"].dropna().unique().tolist()),
 )
 
 max_price = st.sidebar.slider(
     "Precio máximo (€)",
     min_value=int(df["price_eur"].min()),
     max_value=int(df["price_eur"].max()),
-    value=int(df["price_eur"].max())
+    value=int(df["price_eur"].max()),
 )
 
 rooms_filter = st.sidebar.selectbox(
     "Habitaciones mínimas",
-    sorted(df["rooms"].dropna().unique().tolist())
+    sorted(df["rooms"].dropna().unique().tolist()),
 )
+
 
 # ============================================================
 # FILTER DATA
@@ -113,8 +150,9 @@ df_filtered = filter_properties(
     df=df,
     city_filter=city_filter,
     max_price=max_price,
-    min_rooms=rooms_filter
+    min_rooms=rooms_filter,
 )
+
 
 # ============================================================
 # MAIN HEADER
@@ -128,7 +166,30 @@ Sistema inteligente para detectar oportunidades inmobiliarias
 mediante scoring multicriterio, análisis de valor y confort.
 """)
 
+
+# ============================================================
+# PIPELINE STATUS
+# ============================================================
+
+pipeline_summary = get_last_ingestion_summary()
+
+st.success(
+    f"""
+🟢 Pipeline Status: {pipeline_summary['status']}
+
+📡 Fuente: {pipeline_summary['source_name']}
+
+🏠 Raw Properties: {pipeline_summary['total_raw']}  
+🧹 Normalized: {pipeline_summary['total_normalized']}  
+🎯 Filtered: {pipeline_summary['total_filtered']}  
+💾 Saved: {pipeline_summary['total_saved']}  
+
+📝 {pipeline_summary['message']}
+"""
+)
+
 st.divider()
+
 
 # ============================================================
 # MAIN METRICS
@@ -138,24 +199,24 @@ col1, col2, col3, col4 = st.columns(4)
 
 col1.metric(
     "Propiedades",
-    len(df_filtered)
+    len(df_filtered),
 )
 
 if not df_filtered.empty:
 
     col2.metric(
         "Precio medio (€)",
-        round(get_average_price_from_df(df_filtered), 0)
+        round(get_average_price_from_df(df_filtered), 0),
     )
 
     col3.metric(
         "€/m² medio",
-        round(get_average_price_m2(df_filtered), 2)
+        round(get_average_price_m2(df_filtered), 2),
     )
 
     col4.metric(
         "Opportunity Score",
-        round(get_average_opportunity_score(df_filtered), 2)
+        round(get_average_opportunity_score(df_filtered), 2),
     )
 
 else:
@@ -163,6 +224,7 @@ else:
     col2.metric("Precio medio (€)", 0)
     col3.metric("€/m² medio", 0)
     col4.metric("Opportunity Score", 0)
+
 
 # ============================================================
 # SECONDARY METRICS
@@ -176,18 +238,19 @@ if not df_filtered.empty:
 
     col5.metric(
         "Value Score",
-        round(get_average_value_score(df_filtered), 2)
+        round(get_average_value_score(df_filtered), 2),
     )
 
     col6.metric(
         "Comfort Score",
-        round(get_average_comfort_score(df_filtered), 2)
+        round(get_average_comfort_score(df_filtered), 2),
     )
 
     col7.metric(
         "Quality Score",
-        round(get_average_quality_score(df_filtered), 2)
+        round(get_average_quality_score(df_filtered), 2),
     )
+
 
 # ============================================================
 # BEST OPPORTUNITY
@@ -205,13 +268,13 @@ if not df_filtered.empty:
         f"""
 🏆 {best['city']} - {best['zone']}
 
-💰 {best['price_eur']} €
-📐 {best['area_m2']} m²
-🛏️ {best['rooms']} habitaciones
+💰 {best['price_eur']} €  
+📐 {best['area_m2']} m²  
+🛏️ {best['rooms']} habitaciones  
 📊 Opportunity Score: {best['opportunity_score']}
 
-💎 Value Score: {round(best['value_score'], 2)}
-🌴 Comfort Score: {round(best['comfort_score'], 2)}
+💎 Value Score: {round(best['value_score'], 2)}  
+🌴 Comfort Score: {round(best['comfort_score'], 2)}  
 📸 Quality Score: {round(best['quality_score'], 2)}
 """
     )
@@ -221,6 +284,7 @@ else:
     st.warning(
         "No hay propiedades que cumplan los filtros."
     )
+
 
 # ============================================================
 # MAIN TABLE
@@ -234,7 +298,7 @@ if not df_filtered.empty:
 
     ranking_df = get_top_opportunities(
         df_filtered,
-        top_n=len(df_filtered)
+        top_n=len(df_filtered),
     )
 
     st.dataframe(
@@ -250,14 +314,15 @@ if not df_filtered.empty:
             "comfort_score",
             "quality_score",
             "opportunity_score",
-            "opportunity_level"
+            "opportunity_level",
         ]],
-        use_container_width=True
+        use_container_width=True,
     )
 
 else:
 
     st.info("No hay resultados.")
+
 
 # ============================================================
 # TOP 3 CARDS
@@ -269,7 +334,10 @@ st.subheader("🥇 Top 3 oportunidades")
 
 if not df_filtered.empty:
 
-    top3 = get_top_opportunities(df_filtered, top_n=3)
+    top3 = get_top_opportunities(
+        df_filtered,
+        top_n=3,
+    )
 
     for _, row in top3.iterrows():
 
@@ -289,6 +357,7 @@ if not df_filtered.empty:
 """
         )
 
+
 # ============================================================
 # CHART
 # ============================================================
@@ -301,10 +370,11 @@ if not df_filtered.empty:
 
     chart_data = df_filtered[[
         "city",
-        "opportunity_score"
+        "opportunity_score",
     ]].set_index("city")
 
     st.bar_chart(chart_data)
+
 
 # ============================================================
 # AI INSIGHT
@@ -320,7 +390,7 @@ if not df_filtered.empty:
         df_filtered
         .sort_values(
             by="opportunity_score",
-            ascending=False
+            ascending=False,
         )
         .iloc[0]["city"]
     )
@@ -341,6 +411,7 @@ El modelo detecta oportunidades combinando:
 """
     )
 
+
 # ============================================================
 # MAP
 # ============================================================
@@ -357,8 +428,9 @@ m = add_location_markers(m, locations)
 st_folium(
     m,
     width=1200,
-    height=500
+    height=500,
 )
+
 
 # ============================================================
 # AI RECOMMENDATIONS
@@ -381,9 +453,9 @@ if has_recommendations(recommendations):
             "rooms",
             "lifestyle_score",
             "opportunity_score",
-            "opportunity_level"
+            "opportunity_level",
         ]],
-        use_container_width=True
+        use_container_width=True,
     )
 
 else:
