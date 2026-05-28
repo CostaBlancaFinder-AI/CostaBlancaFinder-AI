@@ -56,9 +56,9 @@ sys.path.append(str(DATABASE_DIR))
 from property_db_repository import (
     save_properties_to_db,
     count_properties,
-    count_price_history
+    count_price_history,
+    save_ingestion_log
 )
-
 
 def main():
 
@@ -168,8 +168,15 @@ def main():
     total_db = count_properties()
     total_history = count_price_history()
 
-    print(f"Total propiedades activas en base de datos: {total_db}")
-    print(f"Total registros históricos de precios: {total_history}")
+    save_ingestion_log(
+        source_name="+".join(active_sources),
+        status="SUCCESS",
+        total_raw=len(raw_properties),
+        total_normalized=len(normalized_df),
+        total_filtered=len(scored_df),
+        total_saved=len(scored_df),
+        message="Pipeline ejecutado correctamente"
+    )
 
     print("\n====================================================")
     print("PIPELINE MULTIFUENTE FINALIZADO CORRECTAMENTE")

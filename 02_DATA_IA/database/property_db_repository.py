@@ -98,7 +98,8 @@ def save_price_history(df: pd.DataFrame) -> None:
     )
 
     print(
-        f"Histórico de precios guardado: {len(history_df)} registros"
+        f"Histórico de precios guardado: "
+        f"{len(history_df)} registros"
     )
 
 
@@ -221,3 +222,70 @@ def count_price_history() -> int:
         total = result.scalar()
 
     return total
+
+
+# ============================================================
+# INGESTION LOGS
+# ============================================================
+
+def save_ingestion_log(
+    source_name: str,
+    status: str,
+    total_raw: int,
+    total_normalized: int,
+    total_filtered: int,
+    total_saved: int,
+    message: str = ""
+) -> None:
+    """
+    Stores ingestion execution logs for monitoring,
+    observability and future analytics.
+    """
+
+    engine = get_engine()
+
+    query = text(
+        """
+        INSERT INTO ingestion_logs (
+
+            source_name,
+            status,
+            total_raw,
+            total_normalized,
+            total_filtered,
+            total_saved,
+            message
+
+        )
+        VALUES (
+
+            :source_name,
+            :status,
+            :total_raw,
+            :total_normalized,
+            :total_filtered,
+            :total_saved,
+            :message
+
+        )
+        """
+    )
+
+    with engine.connect() as connection:
+
+        connection.execute(
+            query,
+            {
+                "source_name": source_name,
+                "status": status,
+                "total_raw": total_raw,
+                "total_normalized": total_normalized,
+                "total_filtered": total_filtered,
+                "total_saved": total_saved,
+                "message": message
+            }
+        )
+
+        connection.commit()
+
+    print("Ingestion log guardado correctamente.")
