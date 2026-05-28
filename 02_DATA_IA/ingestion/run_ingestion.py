@@ -53,6 +53,11 @@ DATABASE_DIR = ROOT_DIR / "02_DATA_IA" / "database"
 
 sys.path.append(str(DATABASE_DIR))
 
+GEOCODING_DIR = ROOT_DIR / "02_DATA_IA" / "geocoding"
+sys.path.append(str(GEOCODING_DIR))
+
+from geocoding_service import enrich_with_coordinates
+
 from property_db_repository import (
     save_properties_to_db,
     count_properties,
@@ -125,6 +130,10 @@ def main():
     if filtered_df.empty:
         print("\nWARNING: No quedan propiedades tras filtros.")
         return
+
+    filtered_df = enrich_with_coordinates(filtered_df)
+
+    print("\nCoordenadas geográficas enriquecidas correctamente.")
 
     scored_df = score_properties(filtered_df)
 

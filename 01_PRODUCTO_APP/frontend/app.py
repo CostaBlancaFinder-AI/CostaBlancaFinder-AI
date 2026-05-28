@@ -66,6 +66,7 @@ from recommendation_service import (
 from map_service import (
     create_base_map,
     add_location_markers,
+    add_property_markers,
 )
 
 from search_service import filter_properties
@@ -424,6 +425,7 @@ locations = load_locations()
 
 m = create_base_map()
 m = add_location_markers(m, locations)
+m = add_property_markers(m, df_filtered)
 
 st_folium(
     m,
