@@ -67,6 +67,7 @@ from map_service import (
     create_base_map,
     add_location_markers,
     add_property_markers,
+    add_opportunity_heatmap,
 )
 
 from search_service import filter_properties
@@ -84,6 +85,10 @@ from scoring_service import (
 
 from ingestion_monitoring_service import (
     get_last_ingestion_summary,
+)
+
+from geo_clustering_service import (
+    detect_geo_clusters,
 )
 
 
@@ -378,6 +383,27 @@ if not df_filtered.empty:
 
 
 # ============================================================
+# GEOAI CLUSTERS
+# ============================================================
+
+st.divider()
+
+st.subheader("🧠 Clusters GeoAI de oportunidades")
+
+clusters_df = detect_geo_clusters(df_filtered)
+
+if not clusters_df.empty:
+
+    st.dataframe(
+        clusters_df,
+        width="stretch"
+    )
+
+else:
+
+    st.info("No hay datos suficientes para calcular clusters GeoAI.")
+
+# ============================================================
 # AI INSIGHT
 # ============================================================
 
@@ -424,8 +450,21 @@ st.subheader("🗺️ Mapa Inteligente Costa Blanca")
 locations = load_locations()
 
 m = create_base_map()
-m = add_location_markers(m, locations)
-m = add_property_markers(m, df_filtered)
+
+m = add_opportunity_heatmap(
+    m,
+    df_filtered
+)
+
+m = add_location_markers(
+    m,
+    locations
+)
+
+m = add_property_markers(
+    m,
+    df_filtered
+)
 
 st_folium(
     m,

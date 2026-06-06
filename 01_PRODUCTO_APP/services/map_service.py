@@ -13,7 +13,8 @@ CostaBlancaFinder AI
 Description:
 Centralized geospatial visualization service responsible for
 interactive Folium maps, intelligent property markers,
-GeoAI visualization and future GIS integrations.
+opportunity heatmaps, GeoAI visualization and future GIS
+integrations.
 
 Architecture:
 PropTech + AI + GeoAI + Folium + Streamlit
@@ -28,6 +29,8 @@ MVP / Production-oriented architecture
 
 import folium
 import pandas as pd
+
+from folium.plugins import HeatMap
 
 
 # ============================================================
@@ -59,7 +62,7 @@ def add_location_markers(
     locations_df: pd.DataFrame
 ):
     """
-    Adds generic location markers.
+    Adds generic geographic reference markers.
     """
 
     if locations_df is None or locations_df.empty:
@@ -100,7 +103,7 @@ def add_location_markers(
 
 
 # ============================================================
-# GET MARKER COLOR
+# MARKER COLOR STRATEGY
 # ============================================================
 
 def get_marker_color(opportunity_score: float) -> str:
@@ -166,6 +169,8 @@ def add_property_markers(
         <b>{row['title']}</b><br>
         📍 {row['city']}<br>
         💰 {row['price_eur']} €<br>
+        📐 {row.get('area_m2', 'N/A')} m²<br>
+        🛏️ {row.get('rooms', 'N/A')} habitaciones<br>
         📊 Score: {round(row['opportunity_score'], 2)}
         """
 
@@ -181,5 +186,65 @@ def add_property_markers(
                 icon="home"
             )
         ).add_to(map_object)
+
+    return map_object
+
+
+# ============================================================
+# ADD OPPORTUNITY HEATMAP
+# ============================================================
+
+def add_opportunity_heatmap(
+    map_object,
+    properties_df: pd.DataFrame
+):
+    """
+    Adds an opportunity heatmap weighted by opportunity_score.
+    """
+
+    if properties_df is None or properties_df.empty:
+        return map_object
+
+    required_columns = [
+        "latitude",
+        "longitude",
+        "opportunity_score"
+    ]
+
+    for column in required_columns:
+
+        if column not in properties_df.columns:
+
+            raise ValueError(
+                f"Missing required heatmap column: {column}"
+            )
+
+    clean_df = properties_df.dropna(
+        subset=[
+            "latitude",
+            "longitude",
+            "opportunity_score"
+        ]
+    )
+
+    if clean_df.empty:
+        return map_object
+
+    heat_data = []
+
+    for _, row in clean_df.iterrows():
+
+        heat_data.append([
+            row["latitude"],
+            row["longitude"],
+            row["opportunity_score"] / 100
+        ])
+
+    HeatMap(
+        heat_data,
+        radius=35,
+        blur=25,
+        max_zoom=13
+    ).add_to(map_object)
 
     return map_object
